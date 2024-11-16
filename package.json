@@ -23,8 +23,7 @@
     "url": "https://github.com/vitaliy-bobrov/remarkable-extlink/issues"
   },
   "homepage": "https://github.com/vitaliy-bobrov/remarkable-extlink#readme",
-  "dependencies": {
+  "peerDependencies": {
     "remarkable": "^2.0.1",
-    "url": "^0.11.0"
   }
 }

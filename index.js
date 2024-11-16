@@ -1,5 +1,3 @@
-var url = require('url');
-
 var DEFAULT_OPTIONS = {
   target: '_blank',
   rel: 'nofollow noreferrer noopener'
@@ -11,15 +9,19 @@ var DEFAULT_OPTIONS = {
  * @param href {Object} Parsed url object.
  * @return {Boolean}
  */
-var isInternal = function (host, href) {
-  return href.host === host || (!href.protocol && !href.host && (href.pathname || href.hash));
+function isInternal(host, href) {
+  try {
+    const linkUrl = new URL(href);
+    return linkUrl.host === host || (!linkUrl.protocol && !linkUrl.host && (linkUrl.pathname || linkUrl.hash));
+  } catch (_error) {
+    // Invalid or relative link is considered internal.
+    return true;
+  }
 };
 
-var remarkableExtLink = function (md, options) {
+export default function remarkableExtLink(md, options) {
   var config = Object.assign({}, DEFAULT_OPTIONS, options);
 
-  // Parse and normalize hostname.
-  config.host = url.parse(config.host).host;
   // Save original method to invoke.
   var originalRender = md.renderer.rules.link_open;
 
@@ -29,9 +31,10 @@ var remarkableExtLink = function (md, options) {
     // Invoke original method first.
     result = originalRender.apply(null, arguments);
 
+    // Regex to find href in the rendered output.
     var regexp = /href="([^"]*)"/;
 
-    var href = url.parse(regexp.exec(result)[1]);
+    var href = regexp.exec(result)[1];
 
     if (!isInternal(config.host, href)) {
       result = result.replace('>', ' target="' + config.target + '" rel="' + config.rel + '">');
@@ -40,5 +43,3 @@ var remarkableExtLink = function (md, options) {
     return result;
   };
 };
-
-module.exports = remarkableExtLink;
